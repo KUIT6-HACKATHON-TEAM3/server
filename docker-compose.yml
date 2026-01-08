@@ -1,0 +1,74 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgis/postgis:15-3.3
+    platform: linux/amd64
+    container_name: garosugil-postgres
+    environment:
+      POSTGRES_DB: garosugil
+      POSTGRES_USER: garosugil
+      POSTGRES_PASSWORD: garosugil123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - garosugil-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U garosugil"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: garosugil-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - garosugil-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  spring:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: garosugil-spring
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/garosugil
+      SPRING_DATASOURCE_USERNAME: garosugil
+      SPRING_DATASOURCE_PASSWORD: garosugil123
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - garosugil-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+networks:
+  garosugil-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

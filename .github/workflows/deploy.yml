@@ -35,6 +35,17 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/shade-road-app:latest
           platforms: linux/amd64
 
+      - name: Debug Secret Length
+        run: |
+          if [ -z "$SSH_KEY" ]; then
+            echo "Error: EC2_SSH_KEY is empty or not found!"
+            exit 1
+          else
+            echo "EC2_SSH_KEY is found. Length: ${#SSH_KEY}"
+          fi
+        env:
+          SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:

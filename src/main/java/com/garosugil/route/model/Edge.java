@@ -1,6 +1,6 @@
 package com.garosugil.route.model;
 
-import com.garosugil.domain.location.dto.RouteSearchRequest;
+import com.garosugil.dto.route.RouteSearchRequest;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

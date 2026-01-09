@@ -31,6 +31,6 @@ public class RoadService {
         // JSON 파일에서 도로명 조회
         String roadName = roadDataService.getRoadName(segmentId);
 
-        return new RoadDetailResponse(segmentId, roadName, totalLikeCount, isLiked);
+        return new RoadDetailResponse(segmentId.longValue(), roadName, totalLikeCount, isLiked);
     }
 }

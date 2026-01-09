@@ -9,9 +9,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FavoriteAddRequest {
 
-    @NotNull(message = "segment_id는 필수입니다.")
-    private Integer segment_id;
+    @NotBlank(message = "별칭은 필수입니다.")
+    private String alias;
 
-    @NotBlank(message = "도로명을 입력해주세요.")
-    private String road_name;
+    @NotNull(message = "위도는 필수입니다.")
+    private Double lat;
+
+    @NotNull(message = "경도는 필수입니다.")
+    private Double lng;
+
+    @NotBlank(message = "주소는 필수입니다.")
+    private String address;
 }

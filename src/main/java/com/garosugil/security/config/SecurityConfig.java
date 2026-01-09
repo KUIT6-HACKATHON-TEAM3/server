@@ -37,7 +37,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/roads/**").permitAll() // 토큰 선택적 처리
                         .requestMatchers("/api/music/recommend").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**").permitAll()
+                        .anyRequest().permitAll()
                 )
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

@@ -54,3 +54,13 @@ springdoc:
     operations-sorter: alpha
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
+
+jwt:
+  secret: ckHH/fxXtYuvgG7PnEKWQ15ZmNCal+JslhUq5bLtZIEO+mp/NFD6TuTqQqrJ6YK9KuUdLm1HKDf0lhLZ5lXhIw==
+  expiration: 86400000 # 24시간 (밀리초)
+
+# TMAP API 설정
+tmap:
+  api:
+    key: XHv3EgM6Yq9nwGf1HY7Qt3D7QjgE2grB4e7BgMFC
+    url: https://apis.openapi.sk.com/tmap/routes/pedestrian

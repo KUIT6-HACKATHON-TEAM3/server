@@ -1,6 +1,6 @@
 package com.garosugil.route;
 
-import com.garosugil.domain.location.dto.RouteSearchRequest;
+import com.garosugil.dto.route.RouteSearchRequest;
 import com.garosugil.route.model.Edge;
 import com.garosugil.route.model.EdgeType;
 import com.garosugil.route.model.RouteGraph;

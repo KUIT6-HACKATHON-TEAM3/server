@@ -1,5 +1,7 @@
 package com.garosugil.service;
 
+import com.garosugil.common.exception.DuplicateFavoriteException;
+import com.garosugil.common.exception.FavoriteNotFoundException;
 import com.garosugil.common.exception.NotFoundException;
 import com.garosugil.domain.favorite.Favorite;
 import com.garosugil.domain.user.User;
@@ -30,7 +32,7 @@ public class FavoriteService {
 
         // 이미 저장된 관심 길인지 확인
         if (favoriteRepository.existsByUserIdAndSegmentId(userId, segmentId)) {
-            throw new IllegalArgumentException("이미 등록된 관심 길입니다.");
+            throw new DuplicateFavoriteException("이미 등록된 관심 길입니다.");
         }
 
         Favorite favorite = Favorite.builder()
@@ -58,7 +60,7 @@ public class FavoriteService {
     @Transactional
     public void removeFavorite(Long userId, Long favoriteId) {
         Favorite favorite = favoriteRepository.findById(favoriteId)
-                .orElseThrow(() -> new NotFoundException("관심 길을 찾을 수 없습니다."));
+                .orElseThrow(() -> new FavoriteNotFoundException("관심 길을 찾을 수 없습니다."));
 
         if (!favorite.getUser().getId().equals(userId)) {
             throw new IllegalArgumentException("본인의 관심 길만 삭제할 수 있습니다.");

@@ -28,7 +28,8 @@ public class EmojiController {
             @PathVariable("segment_id") Long segmentId,
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Valid @RequestBody RoadTagCreateRequest request) {
-        emojiService.createTag(segmentId, userPrincipal.getUserId(), request);
+        Long userId = userPrincipal != null ? userPrincipal.getUserId() : null;
+        emojiService.createTag(segmentId, userId, request);
         return ResponseEntity.status(201).body(ApiResponse.success(201, "태그가 등록되었습니다."));
     }
 }

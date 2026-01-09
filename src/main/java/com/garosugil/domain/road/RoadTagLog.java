@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -30,9 +29,6 @@ public class RoadTagLog {
     @Column(name = "tag_code", nullable = false)
     private String tagCode;
 
-    @Column(name = "visit_date", nullable = false)
-    private LocalDate visitDate;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -42,10 +38,9 @@ public class RoadTagLog {
     }
 
     @Builder
-    public RoadTagLog(Long segmentId, User user, String tagCode, LocalDate visitDate) {
+    public RoadTagLog(Long segmentId, User user, String tagCode) {
         this.segmentId = segmentId;
         this.user = user;
         this.tagCode = tagCode;
-        this.visitDate = visitDate;
     }
 }

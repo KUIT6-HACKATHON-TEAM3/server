@@ -29,6 +29,6 @@ public class RouteController {
             @Valid @RequestBody RouteSearchRequest request) {
         Long userId = userPrincipal != null ? userPrincipal.getUserId() : null;
         RouteSearchResponse response = routeService.searchRoutes(request, userId);
-        return ResponseEntity.ok(ApiResponse.success(200, "경로 탐색 성공", response));
+        return ResponseEntity.ok(ApiResponse.success(200, "경로 탐색 완료", response));
     }
 }

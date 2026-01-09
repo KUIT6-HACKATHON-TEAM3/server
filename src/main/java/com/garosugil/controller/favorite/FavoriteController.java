@@ -32,6 +32,10 @@ public class FavoriteController {
     public ResponseEntity<ApiResponse<FavoriteAddResponse>> addFavorite(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable("segment_id") Long segmentId) {
+        if (userPrincipal == null) {
+            return ResponseEntity.status(401)
+                    .body(ApiResponse.error(401, "인증이 필요합니다."));
+        }
         FavoriteAddResponse response = favoriteService.addFavorite(
                 userPrincipal.getUserId(), segmentId);
         return ResponseEntity.ok(ApiResponse.success(200, "관심 길에 저장되었습니다.", response));

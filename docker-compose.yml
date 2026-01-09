@@ -45,6 +45,7 @@ services:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: prod
+      JWT_SECRET: ckHH/fxXtYuvgG7PnEKWQ15ZmNCal+JslhUq5bLtZIEO+mp/NFD6TuTqQqrJ6YK9KuUdLm1HKDf0lhLZ5lXhIw==
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/garosugil
       SPRING_DATASOURCE_USERNAME: garosugil
       SPRING_DATASOURCE_PASSWORD: garosugil123

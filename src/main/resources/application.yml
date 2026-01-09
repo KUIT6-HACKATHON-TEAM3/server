@@ -57,7 +57,8 @@ springdoc:
 
 jwt:
   secret: ckHH/fxXtYuvgG7PnEKWQ15ZmNCal+JslhUq5bLtZIEO+mp/NFD6TuTqQqrJ6YK9KuUdLm1HKDf0lhLZ5lXhIw==
-  expiration: 86400000 # 24시간 (밀리초)
+  access-expiration: 3600000 # 1시간
+  refresh-expiration: 604800000 # 7일
 
 # TMAP API 설정
 tmap:

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "🛣️ 가로수길 API", description = "가로수길 관련 API")
 @RestController
-@RequestMapping("/api/roads")
+@RequestMapping("/roads")
 @RequiredArgsConstructor
 public class RoadController {
 

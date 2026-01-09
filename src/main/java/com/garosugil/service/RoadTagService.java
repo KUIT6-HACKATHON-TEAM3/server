@@ -50,7 +50,7 @@ public class RoadTagService {
     public void createTag(Long roadId, Long userId, RoadTagCreateRequest request) {
         LocalDate today = LocalDate.now();
 
-        if (roadTagLogRepository.findByRoadIdAndUserIdAndVisitDate(roadId, userId, today).isPresent()) {
+        if (roadTagLogRepository.findBySegmentIdAndUserIdAndVisitDate(roadId, userId, today).isPresent()) {
             throw new IllegalStateException("오늘은 이미 태그를 남기셨어요.");
         }
 
@@ -58,7 +58,7 @@ public class RoadTagService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         RoadTagLog log = RoadTagLog.builder()
-                .roadId(roadId)
+                .segmentId(roadId)
                 .user(user)
                 .tagCode(request.getTag_code())
                 .visitDate(today)
@@ -68,11 +68,11 @@ public class RoadTagService {
     }
 
     public RoadTagStatsResponse getStats(Long roadId, Long userId) {
-        List<RoadTagLog> logs = roadTagLogRepository.findByRoadId(roadId);
+        List<RoadTagLog> logs = roadTagLogRepository.findBySegmentId(roadId);
 
         String mySelection = null;
         if (userId != null) {
-            mySelection = roadTagLogRepository.findByRoadIdAndUserIdAndVisitDate(roadId, userId, LocalDate.now())
+            mySelection = roadTagLogRepository.findBySegmentIdAndUserIdAndVisitDate(roadId, userId, LocalDate.now())
                     .map(RoadTagLog::getTagCode)
                     .orElse(null);
         }

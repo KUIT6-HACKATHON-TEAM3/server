@@ -3,6 +3,9 @@ package com.garosugil.domain.road;
 import com.garosugil.domain.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import jakarta.persistence.Id;             // (O) 이거여야 합니다!
+import jakarta.persistence.GeneratedValue; // (O)
+import jakarta.persistence.GenerationType; // (O)
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

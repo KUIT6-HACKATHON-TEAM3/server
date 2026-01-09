@@ -1,4 +1,4 @@
-package com.garosugil.web.favorite;
+package com.garosugil.controller.favorite;
 
 import com.garosugil.common.response.ApiResponse;
 import com.garosugil.dto.favorite.FavoriteAddRequest;

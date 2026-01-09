@@ -1,4 +1,4 @@
-package com.garosugil.web.route;
+package com.garosugil.controller.route;
 
 import com.garosugil.common.response.ApiResponse;
 import com.garosugil.dto.route.RouteSearchRequest;

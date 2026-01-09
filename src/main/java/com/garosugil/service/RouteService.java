@@ -79,7 +79,7 @@ public class RouteService {
             fastest = new RouteSearchResponse.FastestRoute(
                     "FASTEST",
                     fastestTimeMin,
-                    fastestRouteInfo.getSummary().getDistance_meter(),
+                    fastestRouteInfo.getSummary().getDistanceMeter(),
                     fastestRouteInfo.getPath()
             );
         }

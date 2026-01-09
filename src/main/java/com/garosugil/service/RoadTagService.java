@@ -61,7 +61,6 @@ public class RoadTagService {
                 .segmentId(roadId)
                 .user(user)
                 .tagCode(request.getTagCode())
-                .visitDate(today)
                 .build();
 
         roadTagLogRepository.save(log);

@@ -1,4 +1,4 @@
-package com.garosugil.web.auth;
+package com.garosugil.controller.auth;
 
 import com.garosugil.common.response.ApiResponse;
 import com.garosugil.dto.auth.LoginRequest;

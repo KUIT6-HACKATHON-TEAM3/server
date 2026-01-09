@@ -1,4 +1,4 @@
-package com.garosugil.web.music;
+package com.garosugil.controller.music;
 
 import com.garosugil.common.response.ApiResponse;
 import com.garosugil.dto.music.MusicRecommendRequest;

@@ -1,4 +1,4 @@
-package com.garosugil.web.road;
+package com.garosugil.controller.road;
 
 import com.garosugil.common.response.ApiResponse;
 import com.garosugil.dto.road.RoadDetailResponse;

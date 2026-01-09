@@ -41,7 +41,7 @@ public class EmojiService {
                 .segmentId(segmentId)
                 .user(user)
                 .tagCode(request.getTagCode())
-                .visitDate(LocalDate.now())
+                // .visitDate(LocalDate.now())
                 .build();
 
         try {

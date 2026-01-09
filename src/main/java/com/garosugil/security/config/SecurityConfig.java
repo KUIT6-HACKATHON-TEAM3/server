@@ -32,7 +32,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:5173","https://frontend-ochre-chi-68.vercel.app/")); // 프론트엔드 주소 추가
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:5173","https://frontend-ochre-chi-68.vercel.app")); // 프론트엔드 주소 추가
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true); // 쿠키 전송 허용
@@ -53,7 +53,7 @@ public class SecurityConfig {
                         // 인증 없이 접근 가능한 Auth API
                         .requestMatchers("/api/auth/signup").permitAll()
                         .requestMatchers("/api/auth/login").permitAll()
-                        .requestMatchers("/api/auth/reissue").permitAll()
+                        .requestMatchers("/api/auth/reissue","/auth/signup").permitAll()
                         .requestMatchers("/api/auth/send").permitAll()
                         .requestMatchers("/api/auth/verify").permitAll()
                         // 인증 필요한 Auth API

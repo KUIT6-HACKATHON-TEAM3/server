@@ -5,8 +5,8 @@ import com.garosugil.common.exception.InvalidLoginException;
 import com.garosugil.domain.user.User;
 import com.garosugil.dto.auth.LoginRequest;
 import com.garosugil.dto.auth.LoginResponse;
+import com.garosugil.dto.auth.LoginTokens;
 import com.garosugil.dto.auth.SignupRequest;
-import com.garosugil.dto.auth.SignupResponse;
 import com.garosugil.repository.UserRepository;
 import com.garosugil.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
-    public SignupResponse signup(SignupRequest request) {
+    public void signup(SignupRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateEmailException("이미 사용 중인 이메일입니다.");
         }
@@ -35,15 +35,10 @@ public class AuthService {
                 .nickname(request.getNickname())
                 .build();
 
-        User savedUser = userRepository.save(user);
-
-        return new SignupResponse(
-                savedUser.getId(),
-                savedUser.getEmail()
-        );
+        userRepository.save(user);
     }
 
-    public LoginResponse login(LoginRequest request) {
+    public LoginTokens login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new InvalidLoginException("이메일 또는 비밀번호가 올바르지 않습니다."));
 
@@ -51,8 +46,9 @@ public class AuthService {
             throw new InvalidLoginException("이메일 또는 비밀번호가 올바르지 않습니다.");
         }
 
-        String accessToken = jwtTokenProvider.createToken(user.getId());
+        String accessToken = jwtTokenProvider.createAccessToken(user.getId());
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
 
-        return new LoginResponse(accessToken, user.getNickname());
+        return new LoginTokens(accessToken, refreshToken, user.getNickname());
     }
 }

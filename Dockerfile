@@ -11,6 +11,8 @@ COPY settings.gradle .
 COPY src src
 
 RUN chmod +x ./gradlew
+RUN sed -i 's/\r$//' gradlew && chmod +x gradlew
+
 RUN ./gradlew bootJar
 
 FROM amazoncorretto:17-alpine-jdk

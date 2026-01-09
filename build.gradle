@@ -27,7 +27,17 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    
+
+    // ✅ (추가) Spring Security
+    // PasswordEncoder, SecurityFilterChain, EnableWebSecurity, 각종 security.* 패키지 컴파일을 위해 필요
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // ✅ (추가) JWT (JJWT)
+    // JwtTokenProvider에서 사용하는 io.jsonwebtoken.* (Claims, Jwts, Keys 등) 컴파일/런타임 의존성
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'         // 컴파일 시 필요한 API
+    runtimeOnly  'io.jsonwebtoken:jjwt-impl:0.12.3'          // 런타임 구현체
+    runtimeOnly  'io.jsonwebtoken:jjwt-jackson:0.12.3'       // Jackson 기반 직렬화/역직렬화
+
     // PostgreSQL & Spatial
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.hibernate.orm:hibernate-spatial:6.4.1.Final'
@@ -45,6 +55,10 @@ dependencies {
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // ✅ (추가) Spring Security Test
+    // @WithMockUser 등 security 테스트 유틸 사용 시 필요
+    testImplementation 'org.springframework.security:spring-security-test'
 }
 
 tasks.named('test') {

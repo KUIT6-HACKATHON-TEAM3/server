@@ -6,6 +6,7 @@ import com.garosugil.dto.favorite.FavoriteAddResponse;
 import com.garosugil.dto.favorite.FavoriteListItem;
 import com.garosugil.security.auth.UserPrincipal;
 import com.garosugil.service.FavoriteService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-
+@Tag(name = "♥️ 관심 길 API", description = "관심 길 관련 API")
 @RestController
 @RequestMapping("/api/favorites")
 @RequiredArgsConstructor

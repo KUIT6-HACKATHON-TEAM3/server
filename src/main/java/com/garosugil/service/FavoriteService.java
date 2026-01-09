@@ -29,16 +29,13 @@ public class FavoriteService {
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
         // 이미 저장된 관심 길인지 확인
-        if (favoriteRepository.existsByUserIdAndAlias(userId, request.getAlias())) {
-            throw new IllegalArgumentException("이미 등록된 별칭입니다.");
+        if (favoriteRepository.existsByUserIdAndSegmentId(userId, request.getSegmentId())) {
+            throw new IllegalArgumentException("이미 등록된 관심 길입니다.");
         }
 
         Favorite favorite = Favorite.builder()
                 .user(user)
-                .alias(request.getAlias())
-                .lat(request.getLat())
-                .lng(request.getLng())
-                .address(request.getAddress())
+                .segmentId(request.getSegmentId())
                 .build();
 
         Favorite savedFavorite = favoriteRepository.save(favorite);
@@ -52,10 +49,7 @@ public class FavoriteService {
         return favorites.stream()
                 .map(favorite -> new FavoriteListItem(
                         favorite.getId(),
-                        favorite.getAlias(),
-                        favorite.getLat(),
-                        favorite.getLng(),
-                        favorite.getAddress(),
+                        favorite.getSegmentId(),
                         favorite.getCreatedAt()
                 ))
                 .collect(Collectors.toList());

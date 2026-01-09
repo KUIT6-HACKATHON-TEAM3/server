@@ -1,4 +1,4 @@
-package com.garosugil.domain.favorite;
+package com.garosugil.domain.emoji;
 
 import com.garosugil.domain.user.User;
 import jakarta.persistence.*;
@@ -10,22 +10,25 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "favorites")
+@Table(name = "road_tag_logs")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Favorite {
+public class EmojiTagLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "favorite_id")
+    @Column(name = "log_id")
     private Long id;
+
+    @Column(name = "segment_id", nullable = false)
+    private Long segmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "segment_id", nullable = false)
-    private Long segmentId;
+    @Column(name = "tag_code", nullable = false)
+    private String tagCode;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -36,8 +39,9 @@ public class Favorite {
     }
 
     @Builder
-    public Favorite(User user, Long segmentId) {
-        this.user = user;
+    public EmojiTagLog(Long segmentId, User user, String tagCode) {
         this.segmentId = segmentId;
+        this.user = user;
+        this.tagCode = tagCode;
     }
 }

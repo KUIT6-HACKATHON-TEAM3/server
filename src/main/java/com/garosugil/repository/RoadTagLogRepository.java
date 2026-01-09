@@ -8,6 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RoadTagLogRepository extends JpaRepository<RoadTagLog, Long> {
-    Optional<RoadTagLog> findByRoadIdAndUserIdAndVisitDate(Long roadId, Long userId, LocalDate visitDate);
+    Optional<RoadTagLog> findByRoadIdAndUserIdAndVisitDate(Long roadId, Long userId, LocalDate createdAt);
     List<RoadTagLog> findByRoadId(Long roadId);
 }

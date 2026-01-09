@@ -32,4 +32,3 @@ public class RouteController {
         return ResponseEntity.ok(ApiResponse.success(200, "경로 탐색 성공", response));
     }
 }
-

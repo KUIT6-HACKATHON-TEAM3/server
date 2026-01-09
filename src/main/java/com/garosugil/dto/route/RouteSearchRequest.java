@@ -1,5 +1,6 @@
 package com.garosugil.dto.route;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -13,19 +14,17 @@ public class RouteSearchRequest {
     @Schema(description = "사용자 현재 위치")
     @NotNull(message = "사용자 위치는 필수입니다.")
     @Valid
+    @JsonProperty("userLocation")
     private Location userLocation;
 
-    @Schema(description = "목적지 타입 (ROAD_ENTRY: 도로 진입, PIN_COORD: 핀 좌표)", example = "ROAD_ENTRY")
-    @NotNull(message = "목적지 타입은 필수입니다.")
-    private String targetType; // "ROAD_ENTRY" or "PIN_COORD"
-
-    @Schema(description = "도로 정보 (targetType이 ROAD_ENTRY일 때 사용)")
+    @Schema(description = "핀 위치 (목적지 좌표)")
     @Valid
-    private RoadInfo roadInfo; // targetType이 "ROAD_ENTRY"일 때 사용
+    @JsonProperty("pinLocation")
+    private Location pinLocation;
 
-    @Schema(description = "핀 위치 (targetType이 PIN_COORD일 때 사용)")
-    @Valid
-    private Location pinLocation; // targetType이 "PIN_COORD"일 때 사용
+    @Schema(description = "사용자가 더 걷고 싶은 시간(분). 0 또는 null이면 기본값 적용", example = "25")
+    @JsonProperty("addedTimeReq")
+    private Integer addedTimeReq;
 
     @Getter
     @lombok.Setter
@@ -39,21 +38,5 @@ public class RouteSearchRequest {
         @Schema(description = "경도", example = "126.9780")
         @NotNull(message = "경도는 필수입니다.")
         private Double lng;
-    }
-
-    @Getter
-    @lombok.Setter
-    @NoArgsConstructor
-    @lombok.ToString
-    public static class RoadInfo {
-        @Schema(description = "도로 시작 좌표")
-        @NotNull(message = "시작 좌표는 필수입니다.")
-        @Valid
-        private Location start;
-
-        @Schema(description = "도로 종료 좌표")
-        @NotNull(message = "종료 좌표는 필수입니다.")
-        @Valid
-        private Location end;
     }
 }

@@ -4,7 +4,6 @@ import com.garosugil.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -43,6 +42,7 @@ public class SecurityConfig {
                         // 인증 없이 접근 가능한 API들
                         .requestMatchers("/api/routes/search").permitAll()
                         .requestMatchers("/api/roads/**").permitAll() // 토큰 선택적 처리
+                        .requestMatchers("/api/emoji/**").permitAll() // 토큰 선택적 처리
                         .requestMatchers("/api/music/recommend").permitAll()
                         
                         // Swagger 및 개발 도구

@@ -44,53 +44,67 @@ public class RouteService {
     private final UserRepository userRepository;
 
     public RouteSearchResponse searchRoutes(RouteSearchRequest request, Long userId) {
-        log.info("경로 탐색 요청: user_location={}, target_type={}",
-                request.getUserLocation(), request.getTargetType());
+        log.info("경로 탐색 요청: userLocation={}, pinLocation={}, addedTimeReq={}",
+                request.getUserLocation(), request.getPinLocation(), request.getAddedTimeReq());
 
         // 목적지 결정 (API 명세서에 따라)
         RouteSearchRequest.Location start = request.getUserLocation();
         RouteSearchRequest.Location end = determineDestination(request);
 
         // 1. TMAP API 호출 - 최단 경로
-        RouteSearchResponse.RouteInfo fastestRoute = searchFastestRoute(
-                start,
-                end
-        );
+        RouteSearchResponse.RouteInfo fastestRouteInfo = searchFastestRoute(start, end);
 
-        int fastestTimeSec = fastestRoute != null && fastestRoute.getSummary() != null
-                ? fastestRoute.getSummary().getDurationSec()
+        int fastestTimeSec = fastestRouteInfo != null && fastestRouteInfo.getSummary() != null
+                ? fastestRouteInfo.getSummary().getDurationSec()
                 : 0;
+        int fastestTimeMin = fastestTimeSec / 60;
 
-        // 2. 여유 경로 탐색 (기본적으로 10분 추가)
-        int reqAddedTimeSec = 600; // 10분 = 600초
-        RouteSearchResponse.RouteInfo ecoRoute = searchEcoRoute(
+        // 2. 추가 시간 처리 (null이거나 0이면 기본값 10분)
+        int reqAddedTimeMin = (request.getAddedTimeReq() != null && request.getAddedTimeReq() > 0)
+                ? request.getAddedTimeReq()
+                : 10; // 기본값 10분
+        int reqAddedTimeSec = reqAddedTimeMin * 60;
+
+        // 3. 여유 경로 탐색
+        RouteSearchResponse.RouteInfo avenueRouteInfo = searchEcoRoute(
                 start,
                 end,
                 reqAddedTimeSec,
                 fastestTimeSec
         );
 
-        if (userId != null && ecoRoute != null) {
-            saveNavigationLog(userId, start, end, reqAddedTimeSec / 60, fastestTimeSec / 60, ecoRoute);
+        // 4. Response 객체 생성
+        RouteSearchResponse.FastestRoute fastest = null;
+        if (fastestRouteInfo != null && fastestRouteInfo.getSummary() != null) {
+            fastest = new RouteSearchResponse.FastestRoute(
+                    "FASTEST",
+                    fastestTimeMin,
+                    fastestRouteInfo.getSummary().getDistance_meter(),
+                    fastestRouteInfo.getPath()
+            );
         }
 
-        // targetName 결정 (roadInfo가 있으면 도로명, 없으면 "목적지")
-        String targetName = "목적지";
-        if ("ROAD_ENTRY".equals(request.getTargetType()) && request.getRoadInfo() != null) {
-            // TODO: 실제로는 segmentId로 도로명을 조회해야 함
-            targetName = "가로수길 진입점";
+        RouteSearchResponse.AvenueRoute avenue = null;
+        if (avenueRouteInfo != null && avenueRouteInfo.getSummary() != null) {
+            int targetTotalTime = fastestTimeMin + reqAddedTimeMin;
+            int actualTimeMin = avenueRouteInfo.getSummary().getDurationSec() / 60;
+            
+            avenue = new RouteSearchResponse.AvenueRoute(
+                    "AVENUE",
+                    reqAddedTimeMin,
+                    targetTotalTime,
+                    actualTimeMin,
+                    avenueRouteInfo.getSummary().getDistanceMeter(),
+                    avenueRouteInfo.getPath()
+            );
         }
 
-        // routes 배열 구성
-        List<RouteSearchResponse.RouteInfo> routes = new ArrayList<>();
-        if (fastestRoute != null) {
-            routes.add(fastestRoute);
-        }
-        if (ecoRoute != null) {
-            routes.add(ecoRoute);
+        // 5. NavigationLog 저장 (토큰 O: user_id 기록, 토큰 X: user_id NULL)
+        if (avenue != null) {
+            saveNavigationLog(userId, start, end, reqAddedTimeMin, fastestTimeMin, avenue);
         }
 
-        return new RouteSearchResponse(targetName, routes);
+        return new RouteSearchResponse(fastest, avenue);
     }
 
     private void saveNavigationLog(Long userId,
@@ -98,55 +112,40 @@ public class RouteService {
                                    RouteSearchRequest.Location end,
                                    int reqAddedTimeMin,
                                    int fastestTimeMin,
-                                   RouteSearchResponse.RouteInfo avenueRoute) {
-        if (avenueRoute == null || avenueRoute.getSummary() == null) {
+                                   RouteSearchResponse.AvenueRoute avenueRoute) {
+        if (avenueRoute == null) {
             return;
         }
 
-        User user = userRepository.findById(userId).orElse(null);
-        int targetTotalTime = fastestTimeMin + reqAddedTimeMin;
-        RouteSearchResponse.RouteInfo.Summary summary = avenueRoute.getSummary();
+        // userId가 있으면 User 객체 조회, 없으면 null
+        User user = null;
+        if (userId != null) {
+            user = userRepository.findById(userId).orElse(null);
+        }
 
         NavigationLog log = NavigationLog.builder()
-                .user(user)
+                .user(user) // null 허용 (토큰 없을 때)
                 .startLat(start.getLat())
                 .startLng(start.getLng())
                 .endLat(end.getLat())
                 .endLng(end.getLng())
                 .routeType(avenueRoute.getType())
-                .addedTimeReq(reqAddedTimeMin)
-                .targetTotalTime(targetTotalTime)
-                .actualEstTime(summary.getDurationSec() / 60) // 초를 분으로 변환
-                .distanceMeters(summary.getDistanceMeter())
+                .addedTimeReq(avenueRoute.getReqAddedTime())
+                .targetTotalTime(avenueRoute.getTargetTotalTime())
+                .actualEstTime(avenueRoute.getActualTime())
+                .distanceMeters(avenueRoute.getDistanceMeter())
                 .build();
 
         navigationLogRepository.save(log);
     }
 
     private RouteSearchRequest.Location determineDestination(RouteSearchRequest request) {
-        if ("PIN_COORD".equals(request.getTargetType()) && request.getPinLocation() != null) {
+        // pinLocation이 있으면 그것을 목적지로 사용
+        if (request.getPinLocation() != null) {
             return request.getPinLocation();
         }
 
-        if ("ROAD_ENTRY".equals(request.getTargetType()) && request.getRoadInfo() != null) {
-            RouteSearchRequest.Location start = request.getRoadInfo().getStart();
-            RouteSearchRequest.Location end = request.getRoadInfo().getEnd();
-            RouteSearchRequest.Location userLoc = request.getUserLocation();
-
-            double distanceToStart = DistanceUtil.calculateDistance(
-                    userLoc.getLat(), userLoc.getLng(),
-                    start.getLat(), start.getLng()
-            );
-
-            double distanceToEnd = DistanceUtil.calculateDistance(
-                    userLoc.getLat(), userLoc.getLng(),
-                    end.getLat(), end.getLng()
-            );
-
-            return distanceToStart <= distanceToEnd ? start : end;
-        }
-
-        throw new IllegalArgumentException("유효하지 않은 목적지 정보입니다.");
+        throw new IllegalArgumentException("pinLocation은 필수입니다.");
     }
 
     /**
@@ -168,7 +167,7 @@ public class RouteService {
     }
 
     /**
-     * 여유 경로 탐색 (ECO)
+     * 여유 경로 탐색 (AVENUE)
      * DFS 알고리즘을 사용하여 가로수길을 최대한 많이 지나는 경로를 탐색합니다.
      */
     private RouteSearchResponse.RouteInfo searchEcoRoute(
@@ -182,19 +181,6 @@ public class RouteService {
             int reqAddedTimeMin = reqAddedTimeSec / 60;
             int fastestTimeMin = fastestTimeSec / 60;
             RouteSearchResponse.RouteInfo routeInfo = avenueRouteService.searchAvenueRoute(start, end, reqAddedTimeMin, fastestTimeMin);
-            
-            // tags 추가 (ECO 타입일 때만)
-            if (routeInfo != null && "ECO".equals(routeInfo.getType())) {
-                List<String> tags = new ArrayList<>();
-                tags.add("▲ 그늘 80%");
-                tags.add("● 여유로움");
-                // tags를 설정하기 위해 새로운 RouteInfo 생성 필요
-                // 하지만 현재 구조상 tags는 생성자에 포함되어 있지 않으므로, 
-                // AvenueRouteService에서 tags를 포함하도록 수정하거나
-                // 여기서 tags를 추가하는 로직이 필요함
-                // 일단 기본 구조만 유지
-            }
-            
             return routeInfo;
         } catch (Exception e) {
             log.error("여유 경로 탐색 실패", e);
@@ -255,11 +241,11 @@ public class RouteService {
         TmapRouteResponse.Geometry geometry = feature.getGeometry();
 
         // 경로 좌표 변환 (TMAP: [lng, lat] -> 우리 형식: {lat, lng})
-        List<RouteSearchResponse.RouteInfo.PathPoint> path = new ArrayList<>();
+        List<RouteSearchResponse.PathPoint> path = new ArrayList<>();
         if (geometry != null && geometry.getCoordinates() != null) {
             for (List<Double> coord : geometry.getCoordinates()) {
                 if (coord.size() >= 2) {
-                    path.add(new RouteSearchResponse.RouteInfo.PathPoint(
+                    path.add(new RouteSearchResponse.PathPoint(
                             coord.get(1), // lat
                             coord.get(0)  // lng
                     ));
@@ -276,7 +262,6 @@ public class RouteService {
                 durationSec
         );
 
-        // FASTEST 타입은 tags가 없음
-        return new RouteSearchResponse.RouteInfo(type, summary, null, path);
+        return new RouteSearchResponse.RouteInfo(type, summary, path);
     }
 }

@@ -119,7 +119,7 @@ public class AvenueRouteService {
             int reqAddedTime,
             int fastestTimeMin
     ) {
-        List<RouteSearchResponse.RouteInfo.PathPoint> path = new ArrayList<>();
+        List<RouteSearchResponse.PathPoint> path = new ArrayList<>();
         addPoint(path, start.getLat(), start.getLng());
 
         for (Edge e : edges) {
@@ -153,12 +153,12 @@ public class AvenueRouteService {
                         durationSec
                 );
 
-        // ECO 타입에 tags 추가
-        List<String> tags = new ArrayList<>();
-        tags.add("▲ 그늘 80%");
-        tags.add("● 여유로움");
+        // AVENUE 타입에 tags 추가
+        // List<String> tags = new ArrayList<>();
+        // tags.add("▲ 그늘 80%");
+        // tags.add("● 여유로움");
 
-        return new RouteSearchResponse.RouteInfo("ECO", summary, tags, path);
+        return new RouteSearchResponse.RouteInfo("AVENUE", summary, path);
     }
 
     private int calculateMaxTimeSec(int reqAddedTime, int fastestTimeMin) {
@@ -183,14 +183,15 @@ public class AvenueRouteService {
     /**
      * 연속 중복 좌표를 줄여 path 크기를 통제(로그/응답 폭주 방지)
      */
-    private void addPoint(List<RouteSearchResponse.RouteInfo.PathPoint> path, double lat, double lng) {
+    private void addPoint(List<RouteSearchResponse.PathPoint> path, double lat, double lng) {
         int n = path.size();
         if (n > 0) {
-            RouteSearchResponse.RouteInfo.PathPoint last = path.get(n - 1);
+            RouteSearchResponse.PathPoint last = path.get(n - 1);
             if (Math.abs(last.getLat() - lat) < 1e-9 && Math.abs(last.getLng() - lng) < 1e-9) {
                 return;
             }
         }
-        path.add(new RouteSearchResponse.RouteInfo.PathPoint(lat, lng));
+        path.add(new RouteSearchResponse.PathPoint(lat, lng));
     }
+    
 }

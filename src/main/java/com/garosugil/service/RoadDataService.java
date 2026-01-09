@@ -2,14 +2,21 @@ package com.garosugil.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.garosugil.domain.road.StreetSegment;
+import com.garosugil.repository.StreetSegmentRepository;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.garosugil.dto.route.RouteSearchRequest;
 import lombok.AllArgsConstructor;
-import lombok.Setter;
 
 import jakarta.annotation.PostConstruct;
 import java.io.InputStream;
@@ -24,12 +31,16 @@ import java.util.Map;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class RoadDataService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Map<Integer, RoadInfo> roadInfoMap = new HashMap<>();
+    private final StreetSegmentRepository streetSegmentRepository;
+    private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
     @PostConstruct
+    @Transactional
     public void loadRoadData() {
         try {
             // JSON 파일을 classpath에서 로드
@@ -46,6 +57,8 @@ public class RoadDataService {
             InputStream inputStream = resource.getInputStream();
 
             JsonNode rootNode = objectMapper.readTree(inputStream);
+
+            List<StreetSegment> segmentsToSave = new ArrayList<>();
 
             // JSON 구조: [ { "segment_id": 1, "road_name": "...", "locations": { "start": {...}, "end": {...} }, ... } ]
             if (rootNode.isArray()) {
@@ -64,14 +77,6 @@ public class RoadDataService {
                                 JsonNode start = locations.get("start");
                                 JsonNode end = locations.get("end");
                                 
-//                                RoadEntryInfo.Location startLoc = new RoadEntryInfo.Location(
-//                                        start.get("lat").asDouble(),
-//                                        start.get("lng").asDouble()
-//                                );
-//                                RoadEntryInfo.Location endLoc = new RoadEntryInfo.Location(
-//                                        end.get("lat").asDouble(),
-//                                        end.get("lng").asDouble()
-//                                );
                                 RouteSearchRequest.Location startLoc = new RouteSearchRequest.Location();
                                 startLoc.setLat(start.get("lat").asDouble());
                                 startLoc.setLng(start.get("lng").asDouble());
@@ -84,26 +89,57 @@ public class RoadDataService {
                             }
                         }
 
-                        // path_geometry 파싱
+                        // path_geometry 파싱 및 LineString 생성
+                        LineString lineString = null;
                         if (item.has("path_geometry")) {
                             List<RouteSearchRequest.Location> pathGeometry = new ArrayList<>();
+                            List<Coordinate> coordinates = new ArrayList<>();
                             JsonNode pathGeometryNode = item.get("path_geometry");
                             if (pathGeometryNode.isArray()) {
                                 for (JsonNode point : pathGeometryNode) {
                                     if (point.has("lat") && point.has("lng")) {
+                                        double lat = point.get("lat").asDouble();
+                                        double lng = point.get("lng").asDouble();
+                                        
                                         RouteSearchRequest.Location loc = new RouteSearchRequest.Location();
-                                        loc.setLat(point.get("lat").asDouble());
-                                        loc.setLng(point.get("lng").asDouble());
+                                        loc.setLat(lat);
+                                        loc.setLng(lng);
                                         pathGeometry.add(loc);
+                                        
+                                        // LineString을 위한 Coordinate 추가 (lng, lat 순서)
+                                        coordinates.add(new Coordinate(lng, lat));
                                     }
                                 }
                             }
                             roadInfo.setPathGeometry(pathGeometry);
+                            
+                            // LineString 생성 (최소 2개 점 필요)
+                            if (coordinates.size() >= 2) {
+                                lineString = geometryFactory.createLineString(coordinates.toArray(new Coordinate[0]));
+                            }
                         }
 
                         roadInfoMap.put(segmentId, roadInfo);
+
+                        // DB에 저장할 StreetSegment 생성
+                        // 이미 존재하는지 확인
+                        if (!streetSegmentRepository.existsById(segmentId.longValue())) {
+                            StreetSegment segment = StreetSegment.builder()
+                                    .id(segmentId.longValue())
+                                    .roadName(roadName)
+                                    .coordinates(lineString)
+                                    .hasTrees(true) // 기본값: 가로수길이므로 true
+                                    .build();
+                            segmentsToSave.add(segment);
+                        }
                     }
                 }
+            }
+
+            // DB에 일괄 저장
+            if (!segmentsToSave.isEmpty()) {
+                streetSegmentRepository.saveAll(segmentsToSave);
+                log.info("가로수길 데이터 DB 저장 완료: {} 개 구간", segmentsToSave.size());
             }
 
             log.info("가로수길 데이터 로드 완료: {} 개 구간", roadInfoMap.size());

@@ -38,16 +38,9 @@ public class RoadController {
         return ResponseEntity.ok(ApiResponse.success(200, "상세 정보 조회 성공", response));
     }
 
-    @PostMapping("/{road_id}/tags")
-    public ResponseEntity<ApiResponse<Void>> createTag(
-            @PathVariable("road_id") Long roadId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @Valid @RequestBody RoadTagCreateRequest request) {
-        roadTagService.createTag(roadId, userPrincipal.getUserId(), request);
-        return ResponseEntity.status(201).body(ApiResponse.success(201, "태그가 등록되었습니다."));
-    }
+    
 
-    @GetMapping("/{road_id}/tags")
+    @GetMapping("/{road_id}/tags") // 주변 가로수길 조회회
     public ResponseEntity<ApiResponse<RoadTagStatsResponse>> getTagStats(
             @PathVariable("road_id") Long roadId,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {

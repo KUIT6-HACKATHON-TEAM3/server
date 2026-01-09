@@ -51,13 +51,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // 인증 없이 접근 가능한 Auth API
-                        .requestMatchers("/api/auth/signup").permitAll()
-                        .requestMatchers("/api/auth/login").permitAll()
-                        .requestMatchers("/api/auth/reissue","/auth/signup").permitAll()
-                        .requestMatchers("/api/auth/send").permitAll()
-                        .requestMatchers("/api/auth/verify").permitAll()
-                        // 인증 필요한 Auth API
-                        .requestMatchers("/api/auth/**").authenticated()
+                        .requestMatchers("/auth/signup", "/auth/login", "/auth/reissue").permitAll()
+                        .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/auth/reissue").permitAll()
+                        .requestMatchers("/api/api/auth/signup", "/api/api/auth/login", "/api/api/auth/reissue").permitAll()
+
                         
                         // 인증 없이 접근 가능한 API들
                         .requestMatchers("/api/routes/search").permitAll()

@@ -13,13 +13,13 @@ public class FastestRouteDto {
     private String type; // "FASTEST"
     
     @Schema(description = "실제 소요 시간 (분)", example = "12")
-    private Integer actual_time;
+    private Integer actualTime;
     
     @Schema(description = "거리 (미터)", example = "850")
-    private Integer distance_meter;
+    private Integer distanceMeter;
     
     @Schema(description = "표시 메시지", example = "최단 경로")
-    private String display_msg;
+    private String displayMsg;
     
     @Schema(description = "경로 좌표 목록")
     private List<PathPoint> path;

@@ -16,5 +16,5 @@ public class FavoriteListItem {
     private Long segment_id;
     
     @Schema(description = "등록 일시", example = "2026-01-09T10:30:00")
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 }

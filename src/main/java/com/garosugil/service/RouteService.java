@@ -45,10 +45,10 @@ public class RouteService {
 
     public RouteSearchResponse searchRoutes(RouteSearchRequest request, Long userId) {
         log.info("경로 탐색 요청: user_location={}, target_type={}",
-                request.getUser_location(), request.getTarget_type());
+                request.getUserLocation(), request.getTargetType());
 
         // 목적지 결정 (API 명세서에 따라)
-        RouteSearchRequest.Location start = request.getUser_location();
+        RouteSearchRequest.Location start = request.getUserLocation();
         RouteSearchRequest.Location end = determineDestination(request);
 
         // 1. TMAP API 호출 - 최단 경로
@@ -58,7 +58,7 @@ public class RouteService {
         );
 
         int fastestTimeSec = fastestRoute != null && fastestRoute.getSummary() != null
-                ? fastestRoute.getSummary().getDuration_sec()
+                ? fastestRoute.getSummary().getDurationSec()
                 : 0;
 
         // 2. 여유 경로 탐색 (기본적으로 10분 추가)
@@ -74,10 +74,10 @@ public class RouteService {
             saveNavigationLog(userId, start, end, reqAddedTimeSec / 60, fastestTimeSec / 60, ecoRoute);
         }
 
-        // target_name 결정 (road_info가 있으면 도로명, 없으면 "목적지")
+        // targetName 결정 (roadInfo가 있으면 도로명, 없으면 "목적지")
         String targetName = "목적지";
-        if ("ROAD_ENTRY".equals(request.getTarget_type()) && request.getRoad_info() != null) {
-            // TODO: 실제로는 segment_id로 도로명을 조회해야 함
+        if ("ROAD_ENTRY".equals(request.getTargetType()) && request.getRoadInfo() != null) {
+            // TODO: 실제로는 segmentId로 도로명을 조회해야 함
             targetName = "가로수길 진입점";
         }
 
@@ -116,22 +116,22 @@ public class RouteService {
                 .routeType(avenueRoute.getType())
                 .addedTimeReq(reqAddedTimeMin)
                 .targetTotalTime(targetTotalTime)
-                .actualEstTime(summary.getDuration_sec() / 60) // 초를 분으로 변환
-                .distanceMeters(summary.getDistance_meter())
+                .actualEstTime(summary.getDurationSec() / 60) // 초를 분으로 변환
+                .distanceMeters(summary.getDistanceMeter())
                 .build();
 
         navigationLogRepository.save(log);
     }
 
     private RouteSearchRequest.Location determineDestination(RouteSearchRequest request) {
-        if ("PIN_COORD".equals(request.getTarget_type()) && request.getPin_location() != null) {
-            return request.getPin_location();
+        if ("PIN_COORD".equals(request.getTargetType()) && request.getPinLocation() != null) {
+            return request.getPinLocation();
         }
 
-        if ("ROAD_ENTRY".equals(request.getTarget_type()) && request.getRoad_info() != null) {
-            RouteSearchRequest.Location start = request.getRoad_info().getStart();
-            RouteSearchRequest.Location end = request.getRoad_info().getEnd();
-            RouteSearchRequest.Location userLoc = request.getUser_location();
+        if ("ROAD_ENTRY".equals(request.getTargetType()) && request.getRoadInfo() != null) {
+            RouteSearchRequest.Location start = request.getRoadInfo().getStart();
+            RouteSearchRequest.Location end = request.getRoadInfo().getEnd();
+            RouteSearchRequest.Location userLoc = request.getUserLocation();
 
             double distanceToStart = DistanceUtil.calculateDistance(
                     userLoc.getLat(), userLoc.getLng(),

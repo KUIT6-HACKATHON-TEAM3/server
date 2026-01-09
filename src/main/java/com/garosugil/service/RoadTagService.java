@@ -60,7 +60,7 @@ public class RoadTagService {
         RoadTagLog log = RoadTagLog.builder()
                 .segmentId(roadId)
                 .user(user)
-                .tagCode(request.getTag_code())
+                .tagCode(request.getTagCode())
                 .visitDate(today)
                 .build();
 

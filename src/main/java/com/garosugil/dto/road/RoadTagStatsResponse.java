@@ -10,13 +10,13 @@ import java.util.List;
 @AllArgsConstructor
 public class RoadTagStatsResponse {
     @Schema(description = "도로 ID", example = "1234")
-    private Long road_id;
+    private Long roadId;
     
     @Schema(description = "총 태그 수", example = "15")
-    private Integer total_count;
+    private Integer totalCount;
     
     @Schema(description = "내가 선택한 태그 (null 가능)", example = "QUIET")
-    private String my_selection; // null 가능
+    private String mySelection; // null 가능
     
     @Schema(description = "태그별 통계 목록")
     private List<RoadTagStatsItem> stats;
@@ -25,7 +25,7 @@ public class RoadTagStatsResponse {
     @AllArgsConstructor
     public static class RoadTagStatsItem {
         @Schema(description = "태그 코드", example = "QUIET")
-        private String tag_code;
+        private String tagCode;
         
         @Schema(description = "태그 라벨", example = "조용함")
         private String label;

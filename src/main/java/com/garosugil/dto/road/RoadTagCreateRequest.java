@@ -11,5 +11,5 @@ public class RoadTagCreateRequest {
 
     @Schema(description = "태그 코드 (QUIET: 조용함, NIGHT_VIEW: 야경, TREE: 나무, WALKABLE: 산책하기 좋음, DOG: 반려견, DATE: 데이트, PHOTO: 사진, SOLO: 혼자)", example = "QUIET")
     @NotBlank(message = "태그 코드는 필수입니다.")
-    private String tag_code; // QUIET, NIGHT_VIEW, TREE, WALKABLE, DOG, DATE, PHOTO, SOLO
+    private String tagCode; // QUIET, NIGHT_VIEW, TREE, WALKABLE, DOG, DATE, PHOTO, SOLO
 }

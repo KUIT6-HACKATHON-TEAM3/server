@@ -8,5 +8,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class FavoriteAddResponse {
     @Schema(description = "생성된 관심 장소 ID", example = "1")
-    private Long favorite_id;
+    private Long favoriteId;
 }

@@ -13,19 +13,19 @@ public class AvenueRouteDto {
     private String type; // "AVENUE" or "ECO"
     
     @Schema(description = "실제 소요 시간 (분)", example = "15")
-    private Integer actual_time;
+    private Integer actualTime;
     
     @Schema(description = "거리 (미터)", example = "1200")
-    private Integer distance_meter;
+    private Integer distanceMeter;
     
     @Schema(description = "표시 메시지", example = "에코 경로")
-    private String display_msg;
+    private String displayMsg;
     
     @Schema(description = "추가된 시간 (분)", example = "3")
-    private Integer req_added_time;
+    private Integer reqAddedTime;
     
     @Schema(description = "목표 총 시간 (분)", example = "15")
-    private Integer target_total_time;
+    private Integer targetTotalTime;
     
     @Schema(description = "경로 좌표 목록")
     private List<PathPoint> path;

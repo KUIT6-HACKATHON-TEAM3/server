@@ -50,7 +50,7 @@ public class RoadTagService {
     public void createTag(Long roadId, Long userId, RoadTagCreateRequest request) {
         LocalDate today = LocalDate.now();
 
-        if (roadTagLogRepository.findBySegmentIdAndUserIdAndVisitDate(roadId, userId, today).isPresent()) {
+        if (roadTagLogRepository.findBySegmentIdAndUserIdAndCreatedAtDate(roadId, userId, today).isPresent()) {
             throw new IllegalStateException("오늘은 이미 태그를 남기셨어요.");
         }
 
@@ -72,7 +72,7 @@ public class RoadTagService {
 
         String mySelection = null;
         if (userId != null) {
-            mySelection = roadTagLogRepository.findBySegmentIdAndUserIdAndVisitDate(roadId, userId, LocalDate.now())
+            mySelection = roadTagLogRepository.findBySegmentIdAndUserIdAndCreatedAtDate(roadId, userId, LocalDate.now())
                     .map(RoadTagLog::getTagCode)
                     .orElse(null);
         }

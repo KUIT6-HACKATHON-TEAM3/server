@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "🔎 도로 검색 API", description = "도로 검색 관련 API")
 @RestController
-@RequestMapping("/api/routes")
+@RequestMapping("/routes")
 @RequiredArgsConstructor
 public class RouteController {
 

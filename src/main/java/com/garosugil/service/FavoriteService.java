@@ -24,18 +24,18 @@ public class FavoriteService {
     private final UserRepository userRepository;
 
     @Transactional
-    public FavoriteAddResponse addFavorite(Long userId, FavoriteAddRequest request) {
+    public FavoriteAddResponse addFavorite(Long userId, Long segmentId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
         // 이미 저장된 관심 길인지 확인
-        if (favoriteRepository.existsByUserIdAndSegmentId(userId, request.getSegmentId())) {
+        if (favoriteRepository.existsByUserIdAndSegmentId(userId, segmentId)) {
             throw new IllegalArgumentException("이미 등록된 관심 길입니다.");
         }
 
         Favorite favorite = Favorite.builder()
                 .user(user)
-                .segmentId(request.getSegmentId())
+                .segmentId(segmentId)
                 .build();
 
         Favorite savedFavorite = favoriteRepository.save(favorite);

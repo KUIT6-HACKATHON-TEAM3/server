@@ -40,6 +40,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
+        System.out.println("Incoming Request: " + request.getMethod() + " " + request.getRequestURI());
+        System.out.println("Request PathInfo: " + request.getPathInfo());
+        System.out.println("Servlet Path: " + request.getServletPath());
 
         filterChain.doFilter(request, response);
     }

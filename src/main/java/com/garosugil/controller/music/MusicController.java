@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "🎶 음악 API", description = "음악 관련 API")
 @RestController
-@RequestMapping("/api/music")
+@RequestMapping("/music")
 @RequiredArgsConstructor
 public class MusicController {
 

@@ -7,6 +7,7 @@ import com.garosugil.dto.road.RoadTagStatsResponse;
 import com.garosugil.security.auth.UserPrincipal;
 import com.garosugil.service.RoadService;
 import com.garosugil.service.RoadTagService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "🛣️ 가로수길 API", description = "가로수길 관련 API")
 @RestController
 @RequestMapping("/api/roads")
 @RequiredArgsConstructor

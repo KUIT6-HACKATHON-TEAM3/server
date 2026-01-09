@@ -5,6 +5,7 @@ import com.garosugil.dto.route.RouteSearchRequest;
 import com.garosugil.dto.route.RouteSearchResponse;
 import com.garosugil.security.auth.UserPrincipal;
 import com.garosugil.service.RouteService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "🔎 도로 검색 API", description = "도로 검색 관련 API")
 @RestController
 @RequestMapping("/api/routes")
 @RequiredArgsConstructor

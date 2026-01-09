@@ -20,8 +20,8 @@ public class RoadTagLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "road_id", nullable = false)
-    private Long roadId;
+    @Column(name = "segment_id", nullable = false)
+    private Long segmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -42,8 +42,8 @@ public class RoadTagLog {
     }
 
     @Builder
-    public RoadTagLog(Long roadId, User user, String tagCode, LocalDate visitDate) {
-        this.roadId = roadId;
+    public RoadTagLog(Long segmentId, User user, String tagCode, LocalDate visitDate) {
+        this.segmentId = segmentId;
         this.user = user;
         this.tagCode = tagCode;
         this.visitDate = visitDate;

@@ -1,15 +1,26 @@
 # Garosugil Server
 
-Spring Boot 프로젝트 with PostgreSQL (PostGIS), Redis
+Spring Boot 기반 가로수길 산책 경로 추천 서버
 
 ## 기술 스택
 
 - **Java 17**
 - **Spring Boot 3.2.1**
-- **PostgreSQL 15 with PostGIS**
-- **Redis 7**
+- **Spring Security + JWT**
+- **PostgreSQL 15**
 - **Hibernate Spatial**
 - **Docker & Docker Compose**
+- **Swagger UI (OpenAPI 3.0)**
+
+## 주요 기능
+
+- 🔐 JWT 기반 인증/인가 (Access Token: HttpOnly Cookie, Refresh Token: Response Body)
+- 🗺️ 가로수길 경로 추천 (최단 경로 / 에코 경로)
+- 🎵 날씨/시간대별 음악 추천
+- ⭐ 도로 좋아요 및 태그 시스템
+- 📍 관심 장소 저장
+- 📝 Swagger UI를 통한 API 문서화
+- ✨ git actions을 이용한 CI/CD
 
 ## 프로젝트 구조
 
@@ -18,17 +29,24 @@ src/
 ├── main/
 │   ├── java/com/garosugil/
 │   │   ├── GarosuggilServerApplication.java
-│   │   ├── domain/
-│   │   │   └── location/
-│   │   │       ├── controller/
-│   │   │       ├── service/
-│   │   │       ├── repository/
-│   │   │       ├── entity/
-│   │   │       └── dto/
-│   │   └── global/
-│   │       └── config/
+│   │   ├── common/          # 공통 예외, 응답 처리
+│   │   ├── config/          # 설정 (Security, OpenAPI, RestTemplate)
+│   │   ├── controller/      # 컨트롤러
+│   │   │   └── auth/
+│   │   ├── domain/          # 엔티티
+│   │   │   ├── user/
+│   │   │   ├── favorite/
+│   │   │   ├── music/
+│   │   │   └── road/
+│   │   ├── dto/             # DTO
+│   │   ├── repository/      # JPA Repository
+│   │   ├── route/           # 경로 알고리즘
+│   │   ├── security/        # JWT, 인증 필터
+│   │   ├── service/         # 비즈니스 로직
+│   │   └── util/            # 유틸리티
 │   └── resources/
-│       └── application.yml
+│       ├── application.yml
+│       └── all_roads_walking_paths.json
 └── test/
 ```
 
@@ -60,33 +78,94 @@ docker-compose up -d postgres redis
 ./gradlew bootRun
 ```
 
-## API 엔드포인트
+## API 문서
 
-### Location API
+애플리케이션 실행 후 Swagger UI에서 API 문서를 확인할 수 있습니다:
 
-- `POST /api/locations` - 새 위치 생성
-- `GET /api/locations` - 모든 위치 조회
-- `GET /api/locations/{id}` - 특정 위치 조회
-- `GET /api/locations/nearby?longitude={lng}&latitude={lat}&radius={m}` - 반경 내 위치 검색
-- `GET /api/locations/search?name={name}` - 이름으로 위치 검색
-- `DELETE /api/locations/{id}` - 위치 삭제
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
+## 주요 API 엔드포인트
+
+### 🔐 인증 API (`/api/auth`)
+
+- `POST /api/auth/signup` - 회원가입
+- `POST /api/auth/login` - 로그인 (Access Token: Cookie, Refresh Token: Body)
+- `POST /api/auth/reissue` - 토큰 재발급
+- `GET /api/auth/my` - 내 정보 조회 (인증 필요)
+
+### 🗺️ 경로 API (`/api/routes`)
+
+- `POST /api/routes/search` - 경로 검색 (최단 경로 + 에코 경로)
+
+### 🎵 음악 API (`/api/music`)
+
+- `POST /api/music/recommend` - 음악 추천
+
+### ⭐ 도로 API (`/api/roads`)
+
+- `GET /api/roads/{segmentId}` - 도로 상세 조회
+- `POST /api/roads/{segmentId}/like` - 도로 좋아요
+- `DELETE /api/roads/{segmentId}/like` - 도로 좋아요 취소
+- `POST /api/roads/{segmentId}/tags` - 도로 태그 추가
+- `GET /api/roads/{segmentId}/tags/stats` - 도로 태그 통계
+
+### 📍 관심 장소 API (`/api/favorites`)
+
+- `POST /api/favorites` - 관심 장소 추가
+- `GET /api/favorites` - 관심 장소 목록 조회
+- `DELETE /api/favorites/{favoriteId}` - 관심 장소 삭제
 
 ### 예제 요청
 
+#### 회원가입
+
 ```bash
-# 위치 생성
-curl -X POST http://localhost:8080/api/locations \
+curl -X POST http://localhost:8080/api/auth/signup \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "가로수길 카페",
-    "description": "멋진 카페",
-    "longitude": 127.0223,
-    "latitude": 37.5186,
-    "address": "서울특별시 강남구 신사동"
+    "email": "user@example.com",
+    "password": "password123!",
+    "nickname": "산책러버"
   }'
+```
 
-# 반경 1km 내 위치 검색
-curl "http://localhost:8080/api/locations/nearby?longitude=127.0223&latitude=37.5186&radius=1000"
+#### 로그인
+
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "password123!"
+  }' \
+  -c cookies.txt
+```
+
+#### 내 정보 조회 (쿠키 사용)
+
+```bash
+curl -X GET http://localhost:8080/api/auth/my \
+  -b cookies.txt
+```
+
+#### 경로 검색
+
+```bash
+curl -X POST http://localhost:8080/api/routes/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_location": {
+      "lat": 37.5665,
+      "lng": 126.9780
+    },
+    "target_type": "ROAD_ENTRY",
+    "road_info": {
+      "start": {"lat": 37.5186, "lng": 127.0223},
+      "end": {"lat": 37.5196, "lng": 127.0233}
+    }
+  }'
 ```
 
 ## EC2 배포
@@ -132,15 +211,45 @@ docker-compose up -d
 docker-compose logs -f
 ```
 
-## 환경 변수
+## 환경 변수 설정
 
-`docker-compose.yml`에서 다음 환경 변수를 수정할 수 있습니다:
+`application.yml` 또는 환경 변수로 다음을 설정할 수 있습니다:
 
-- `POSTGRES_DB`: 데이터베이스 이름
-- `POSTGRES_USER`: 데이터베이스 사용자
-- `POSTGRES_PASSWORD`: 데이터베이스 비밀번호
-- `SPRING_DATA_REDIS_HOST`: Redis 호스트
-- `SPRING_DATA_REDIS_PORT`: Redis 포트
+```yaml
+jwt:
+  secret: your-secret-key-here # JWT 시크릿 키 (최소 256비트)
+  access-expiration: 3600000 # Access Token 만료 시간 (1시간)
+  refresh-expiration: 604800000 # Refresh Token 만료 시간 (7일)
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/garosugil
+    username: postgres
+    password: postgres
+```
+
+## JWT 인증 흐름
+
+1. **로그인**: `/api/auth/login`
+
+   - Access Token → HttpOnly Cookie (1시간)
+   - Refresh Token → Response Body (7일)
+
+2. **API 요청**: 쿠키의 Access Token으로 자동 인증
+
+   - `GET /api/auth/my`
+   - 기타 인증이 필요한 API
+
+3. **토큰 재발급**: `/api/auth/reissue`
+   - Request: Refresh Token (Body)
+   - Response: 새로운 Access Token (Cookie) + 새로운 Refresh Token (Body)
+
+## Swagger UI 사용법
+
+1. 애플리케이션 실행 후 `http://localhost:8080/swagger-ui/index.html` 접속
+2. `/api/auth/login` API로 로그인
+3. 브라우저가 자동으로 쿠키 저장
+4. 이후 API 요청 시 쿠키가 자동으로 포함되어 인증됨
 
 ## 메모리 최적화
 

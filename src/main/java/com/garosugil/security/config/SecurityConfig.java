@@ -31,14 +31,26 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // 인증 없이 접근 가능한 Auth API
+                        .requestMatchers("/api/auth/signup").permitAll()
+                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/reissue").permitAll()
+                        .requestMatchers("/api/auth/send").permitAll()
+                        .requestMatchers("/api/auth/verify").permitAll()
+                        // 인증 필요한 Auth API
+                        .requestMatchers("/api/auth/**").authenticated()
+                        
+                        // 인증 없이 접근 가능한 API들
                         .requestMatchers("/api/routes/search").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/roads/*/tags").authenticated()
                         .requestMatchers("/api/roads/**").permitAll() // 토큰 선택적 처리
                         .requestMatchers("/api/music/recommend").permitAll()
+                        
+                        // Swagger 및 개발 도구
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**").permitAll()
-                        .anyRequest().permitAll()
+                        
+                        // 나머지는 모두 인증 필요
+                        .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

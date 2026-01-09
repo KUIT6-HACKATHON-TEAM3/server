@@ -27,7 +27,7 @@ public class EmojiService {
         RoadTagLog log = RoadTagLog.builder()
                 .segmentId(segmentId)
                 .user(user)
-                .tagCode(request.getTag_code())
+                .tagCode(request.getTagCode())
                 .visitDate(LocalDate.now())
                 .build();
 

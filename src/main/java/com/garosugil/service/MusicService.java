@@ -16,7 +16,7 @@ public class MusicService {
     private final MusicPlaylistRepository musicPlaylistRepository;
 
     public MusicRecommendResponse recommend(MusicRecommendRequest request) {
-        String themeTag = selectThemeTag(request.getWeather(), request.getTime_of_day());
+        String themeTag = selectThemeTag(request.getWeather(), request.getTimeOfDay());
 
         MusicPlaylist playlist = musicPlaylistRepository.findFirstByThemeTagIgnoreCase(themeTag)
                 .orElseGet(() -> musicPlaylistRepository.findFirstByThemeTagIgnoreCase("DEFAULT").orElse(null));

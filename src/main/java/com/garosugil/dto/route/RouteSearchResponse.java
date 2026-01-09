@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 public class RouteSearchResponse {
     @Schema(description = "목적지 이름", example = "가로수길")
-    private String target_name;
+    private String targetName;
     
     @Schema(description = "경로 목록")
     private List<RouteInfo> routes;
@@ -34,10 +34,10 @@ public class RouteSearchResponse {
         @AllArgsConstructor
         public static class Summary {
             @Schema(description = "거리 (미터)", example = "1200")
-            private Integer distance_meter;
+            private Integer distanceMeter;
             
             @Schema(description = "소요 시간 (초)", example = "720")
-            private Integer duration_sec;
+            private Integer durationSec;
         }
 
         @Getter

@@ -67,7 +67,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**").permitAll()
                         
                         // 나머지는 모두 인증 필요
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

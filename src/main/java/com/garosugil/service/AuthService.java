@@ -2,10 +2,15 @@ package com.garosugil.service;
 
 import com.garosugil.common.exception.DuplicateEmailException;
 import com.garosugil.common.exception.InvalidLoginException;
+import com.garosugil.common.exception.UnauthorizedException;
+import com.garosugil.common.exception.NotFoundException;
 import com.garosugil.domain.user.User;
 import com.garosugil.dto.auth.LoginRequest;
 import com.garosugil.dto.auth.LoginResponse;
 import com.garosugil.dto.auth.LoginTokens;
+import com.garosugil.dto.auth.MyInfoResponse;
+import com.garosugil.dto.auth.ReissueRequest;
+import com.garosugil.dto.auth.ReissueTokens;
 import com.garosugil.dto.auth.SignupRequest;
 import com.garosugil.repository.UserRepository;
 import com.garosugil.security.jwt.JwtTokenProvider;
@@ -50,5 +55,28 @@ public class AuthService {
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
 
         return new LoginTokens(accessToken, refreshToken, user.getNickname());
+    }
+
+    public ReissueTokens reissueAccessToken(ReissueRequest request) {
+        // Refresh Token 유효성 검증
+        if (!jwtTokenProvider.validateToken(request.getRefresh_token())) {
+            throw new UnauthorizedException("유효하지 않은 리프레시 토큰입니다.");
+        }
+
+        // Refresh Token에서 사용자 ID 추출
+        Long userId = jwtTokenProvider.getUserIdFromToken(request.getRefresh_token());
+
+        // 새로운 Access Token과 Refresh Token 생성
+        String newAccessToken = jwtTokenProvider.createAccessToken(userId);
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(userId);
+
+        return new ReissueTokens(newAccessToken, newRefreshToken);
+    }
+
+    public MyInfoResponse getMyInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+
+        return new MyInfoResponse(user.getNickname(), user.getEmail());
     }
 }
